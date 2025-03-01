@@ -1,150 +1,189 @@
 -- In this SQL file, write (and comment!) the schema of your database, including the CREATE TABLE, CREATE INDEX, CREATE VIEW, etc. statements that compose it
 
+-- Table for storing seed details
+CREATE TABLE "seeds" (
+    "seed_id" INTEGER,
+    "seed_name_in_english" TEXT NOT NULL,
+    "seed_name_in_sinhala" TEXT NOT NULL,
+    "seed_image" BLOB, -- Store images
+    "days_to_germinate" INTEGER NOT NULL CHECK("days_to_germinate" > 0),
+    "direct_sow" TEXT CHECK("direct_sow" IN ('yes', 'no')) NOT NULL DEFAULT 'no',
+    "water_soak" TEXT CHECK("water_soak" IN ('yes', 'no')) NOT NULL DEFAULT 'no',
+    "how_to_plant" TEXT,
+    "notes" TEXT,
+    PRIMARY KEY("seed_id")
+);
 
 -- Table for storing plant details
 CREATE TABLE "plants" (
     "plant_id" INTEGER,
-    "name" TEXT NOT NULL,
+    "seed_id" INTEGER,
+    "plant_name_in_english" TEXT NOT NULL,
+    "plant_name_in_sinhala" TEXT NOT NULL,
     "plant_type" TEXT CHECK("plant_type" IN ('vegetable', 'fruit', 'herb', 'flower', 'ornamental')) NOT NULL,
-    "image_path" TEXT, -- Store file paths instead of BLOBs for larger images
+    "plant_image" BLOB, -- Store images
     "days_to_maturity" INTEGER NOT NULL CHECK("days_to_maturity" > 0),
     "ideal_sunlight" TEXT CHECK("ideal_sunlight" IN ('bright', 'medium', 'low')) NOT NULL,
-    "ideal_water" TEXT CHECK("ideal_water" IN ('high', 'moderate', 'low')) NOT NULL,
+    "ideal_water" TEXT CHECK("ideal_water" IN ('high', 'moderate', 'low')) NOT NULL DEFAULT 'moderate',
     "ideal_soil" TEXT,
     "how_to_plant" TEXT,
     "notes" TEXT,
-    PRIMARY KEY("plant_id")
+    PRIMARY KEY("plant_id"),
+    FOREIGN KEY ("seed_id") REFERENCES "seeds"("seed_id")
 );
 
 -- Table for garden sections
 CREATE TABLE "sections" (
     "section_id" INTEGER,
-    "name" TEXT NOT NULL,
-    "sunlight_exposure" TEXT,
+    "section_name" TEXT NOT NULL,
+    "sunlight" TEXT CHECK("sunlight" IN ('bright', 'medium', 'low')) NOT NULL,
     "has_space" TEXT CHECK("has_space" IN ('yes', 'no')) DEFAULT 'yes',
-    "soil_type" TEXT,
+    "soil" TEXT,
     "notes" TEXT,
     PRIMARY KEY("section_id")
 );
 
--- Table for tracking planted instances
-CREATE TABLE "planted" (
-    "planted_id" INTEGER,
+-- Table for tracking planted instances--trigger
+CREATE TABLE "plants_and_sections" (
+    "id" INTEGER,
     "plant_id" INTEGER,
     "section_id" INTEGER,
-    "date_planted" DATE NOT NULL,
-    "days_old" INTEGER DEFAULT 0, -- Initialize to 0, will be updated by trigger
-    "days_to_maturity" INTEGER, -- Stores the days to maturity for the planted instance
-    PRIMARY KEY("planted_id"),
+    "planted_date" DATE NOT NULL,
+    "days_old" INTEGER, --trigger
+    "harvest_date" DATE,--trigger
+    PRIMARY KEY("id"),
     FOREIGN KEY("plant_id") REFERENCES "plants"("plant_id"),
     FOREIGN KEY("section_id") REFERENCES "sections"("section_id")
 );
 
--- Table for fertilizers
-CREATE TABLE "fertilizers" (
-    "fertilizer_id" INTEGER,
-    "name" TEXT NOT NULL,
-    "type" TEXT CHECK("type" IN ('liquid', 'powder', 'grain', 'soil')),
-    "frequency_in_days" INTEGER,
-    "ingredients" TEXT,
-    "nutrients" TEXT,
-    "how_to_use" TEXT,
-    "notes" TEXT,
-    PRIMARY KEY("fertilizer_id")
+-- Table for tracking germinated instances--trigger
+CREATE TABLE "seeds_and_sections" (
+    "id" INTEGER,
+    "seed_id" INTEGER,
+    "section_id" INTEGER,
+    "start_date" DATE NOT NULL,
+    "days_old" INTEGER, --trigger
+    "complete_date" DATE,--trigger
+    PRIMARY KEY("id"),
+    FOREIGN KEY("seed_id") REFERENCES "seeds"("seed_id"),
+    FOREIGN KEY("section_id") REFERENCES "sections"("section_id")
 );
-
--- Table for tracking fertilized instances
-CREATE TABLE "fertilized" (
-    "fertilized_id" INTEGER,
-    "plant_id" INTEGER,
-    "fertilizer_id" INTEGER,
-    "date_fertilized" DATE NOT NULL,
-    "next_fertilization_date" DATE GENERATED ALWAYS AS (DATE("date_fertilized", '+' || "frequency_in_days" || ' days')) STORED, -- Calculates the next fertilization date
-    PRIMARY KEY("fertilized_id"),
-    FOREIGN KEY("plant_id") REFERENCES "plants"("plant_id"),
-    FOREIGN KEY("fertilizer_id") REFERENCES "fertilizers"("fertilizer_id")
-);
-
--- Table for germination tracking
-CREATE TABLE "germination" (
-    "germination_id" INTEGER,
-    "name" TEXT NOT NULL, -- Name of the seed/plant type
-    "days_to_plant" INTEGER NOT NULL, -- Number of days until planting
-    "start_date" DATE NOT NULL, -- Date when germination started
-    "plant_date" DATE GENERATED ALWAYS AS (DATE("start_date", '+' || "days_to_plant" || ' days')) STORED, -- Auto-calculates plant date
-    "how_to_germinate" TEXT,
-    "notes" TEXT,
-    PRIMARY KEY("germination_id")
-);
-
-
-
--- Trigger to automatically set days_to_maturity when a new plant is planted
-CREATE TRIGGER "set_days_to_maturity"
-AFTER INSERT ON "planted"
-FOR EACH ROW
-BEGIN
-    UPDATE "planted"
-    SET "days_to_maturity" = (SELECT "days_to_maturity" FROM "plants" WHERE "plant_id" = NEW."plant_id")
-    WHERE "planted_id" = NEW."planted_id";
-END;
-
--- Trigger to calculate and update 'days_old' on insert and update
-CREATE TRIGGER "update_days_old"
-AFTER INSERT OR UPDATE OF "date_planted" ON "planted"
-FOR EACH ROW
-BEGIN
-    UPDATE "planted"
-    SET "days_old" = CAST((JULIANDAY('now') - JULIANDAY(NEW."date_planted")) AS INTEGER)
-    WHERE "planted_id" = NEW."planted_id";
-END;
 
 -- Create indexes to speed common searches
-CREATE INDEX "plant_name_search" ON "plants" ("name");
+CREATE INDEX "plant_name_search" ON "plants" ("plant_name");
 CREATE INDEX "plant_type_search" ON "plants" ("plant_type");
-CREATE INDEX "section_name_search" ON "sections" ("name");
-CREATE INDEX "planted_plant_search" ON "planted" ("plant_id");
-CREATE INDEX "planted_section_search" ON "planted" ("section_id");
-CREATE INDEX "fertilizer_name_search" ON "fertilizers" ("name");
-CREATE INDEX "fertilized_plant_search" ON "fertilized" ("plant_id");
-CREATE INDEX "germination_name_search" ON "germination" ("name");
 
--- View to display plant details with planted information and section information
-CREATE VIEW "plant_planted_section_view" AS
+CREATE INDEX "section_name_search" ON "sections" ("section_name");
+
+CREATE INDEX "seed_name_search" ON "seeds" ("seed_name");
+
+CREATE INDEX "planted_plant_search" ON "plants_and_sections" ("plant_id");
+CREATE INDEX "planted_section_search" ON "plants_and_sections" ("section_id");
+
+CREATE INDEX "planted_seeds_search" ON "seeds_and_sections" ("seed_id");
+
+
+-- Triggers
+
+-- Trigger to calculate days_old for plants_and_sections
+CREATE TRIGGER "update_plants_and_sections_days_old"
+AFTER INSERT ON "plants_and_sections"
+FOR EACH ROW
+BEGIN
+    UPDATE "plants_and_sections"
+    SET "days_old" = CAST((JULIANDAY('now') - JULIANDAY(NEW."planted_date")) AS INTEGER)
+    WHERE "id" = NEW."id";
+END;
+
+-- Trigger to calculate harvest_date for plants_and_sections
+CREATE TRIGGER "update_plants_and_sections_harvest_date"
+AFTER INSERT ON "plants_and_sections"
+FOR EACH ROW
+BEGIN
+    UPDATE "plants_and_sections"
+    SET "harvest_date" = DATE(NEW."planted_date", '+' || (SELECT "days_to_maturity" FROM "plants" WHERE "plant_id" = NEW."plant_id") || ' days')
+    WHERE "id" = NEW."id";
+END;
+
+-- Trigger to calculate days_old for seeds_and_sections
+CREATE TRIGGER "update_seeds_and_sections_days_old"
+AFTER INSERT ON "seeds_and_sections"
+FOR EACH ROW
+BEGIN
+    UPDATE "seeds_and_sections"
+    SET "days_old" = CAST((JULIANDAY('now') - JULIANDAY(NEW."start_date")) AS INTEGER)
+    WHERE "id" = NEW."id";
+END;
+
+-- Trigger to calculate complete_date for seeds_and_sections
+CREATE TRIGGER "update_seeds_and_sections_complete_date"
+AFTER INSERT ON "seeds_and_sections"
+FOR EACH ROW
+BEGIN
+    UPDATE "seeds_and_sections"
+    SET "complete_date" = DATE(NEW."start_date", '+' || (SELECT "days_to_germinate" FROM "seeds" WHERE "seed_id" = NEW."seed_id") || ' days')
+    WHERE "id" = NEW."id";
+END;
+
+-- Views  
+
+-- View for plants and seeds
+CREATE VIEW "plant_seed_view" AS
 SELECT
     p."plant_id",
-    p."name" AS "plant_name",
+    s."seed_id",
+    p."plant_name_in_english",
+    p."plant_name_in_sinhala",
     p."plant_type",
-    p."days_to_maturity" AS "plant_maturity",
-    pl."planted_id",
-    pl."date_planted",
-    pl."days_old",
-    pl."days_to_maturity" AS "planted_maturity",
-    s."section_id",
-    s."name" AS "section_name",
-    s."sunlight_exposure",
-    s."has_space",
-    s."soil_type",
-    s."notes" AS "section_notes"
+    p."days_to_maturity",
+    s."days_to_germinate",
+    p."ideal_sunlight",
+    p."ideal_water",
+    p."ideal_soil",
+    s."direct_sow",
+    s."water_soak",
+    p."how_to_plant",
+    p."notes"
 FROM
     "plants" p
 LEFT JOIN
-    "planted" pl ON p."plant_id" = pl."plant_id"
-LEFT JOIN
-    "sections" s ON pl."section_id" = s."section_id";
+    "seeds" s ON p."seed_id" = s."seed_id";
 
--- View to display fertilized plant details with fertilizer information
-CREATE VIEW "fertilized_plant_view" AS
+-- View for plants and sections
+CREATE VIEW "plant_section_view" AS
 SELECT
+    pas."id" AS "plants_and_sections_id",
     p."plant_id",
-    p."name" AS "plant_name",
-    f."fertilizer_id",
-    f."name" AS "fertilizer_name",
-    fe."date_fertilized",
-    fe."next_fertilization_date"
+    s."section_id",
+    p."plant_name_in_english",
+    p."plant_name_in_sinhala",
+    s."section_name",
+    pas."planted_date",
+    pas."days_old",
+    pas."harvest_date"
 FROM
-    "plants" p
+    "plants_and_sections" pas
 JOIN
-    "fertilized" fe ON p."plant_id" = fe."plant_id"
+    "plants" p ON pas."plant_id" = p."plant_id"
 JOIN
-    "fertilizers" f ON fe."fertilizer_id" = f."fertilizer_id";
+    "sections" s ON pas."section_id" = s."section_id";
+
+-- View for seeds and sections
+CREATE VIEW "seed_section_view" AS
+SELECT
+    sas."id" AS "seeds_and_sections_id",
+    s."seed_id",
+    sec."section_id",
+    s."seed_name_in_english",
+    s."seed_name_in_sinhala",
+    sec."section_name",
+    sas."start_date",
+    sas."days_old",
+    sas."complete_date"
+FROM
+    "seeds_and_sections" sas
+JOIN
+    "seeds" s ON sas."seed_id" = s."seed_id"
+JOIN
+    "sections" sec ON sas."section_id" = sec."section_id";
+

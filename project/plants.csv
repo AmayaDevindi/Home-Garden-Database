@@ -1,0 +1,13 @@
+plant_id,seed_id,plant_name,plant_type,plant_image,days_to_maturity,ideal_sunlight,ideal_water,ideal_soil,how_to_plant,notes
+1,,tomatoes,vegetable,,70,bright,moderate,loamy,"Spacing: 45-60cm, Depth: 0.5-1cm",Grow in well-drained soil, provide support, mulch to retain moisture.
+2,,cabbage,vegetable,,90,bright,high,rich,"Spacing: 30-45cm, Depth: 1-2cm",Cooler parts of the tropics, protect from intense midday sun, mulch heavily.
+3,,chilli pepper,vegetable,,80,bright,moderate,well-drained,"Spacing: 30-45cm, Depth: 0.5cm",Start seeds indoors, provide support, protect from heavy rain.
+4,,okra,vegetable,,60,bright,moderate,sandy loam,"Spacing: 30-45cm, Depth: 1-2cm",Direct sow in warm soil, tolerates heat and humidity.
+5,,pineapple,fruit,,500,bright,low,sandy,"Spacing: 60-90cm, Depth: crown planting",Plant the crown of a pineapple, well-drained soil, protect from frost.
+6,,corn,vegetable,,90,bright,moderate,rich,"Spacing: 20-30cm, Depth: 2-5cm",Plant seeds directly in warm soil, full sun, ensure proper drainage.
+7,,long white raddish,vegetable,,30,bright,moderate,loose,"Spacing: 10-15cm, Depth: 1-2cm",Direct sow in cooler parts of the tropics, avoid waterlogging.
+8,,green long beans,vegetable,,60,bright,moderate,well-drained,"Spacing: 15-20cm, Depth: 2-3cm",Direct sow after last frost, provide support, ensure good drainage.
+9,,cowpea,vegetable,,70,bright,moderate,sandy,"Spacing: 15-20cm, Depth: 2-3cm",Direct sow after last frost, tolerates poor soil, drought-tolerant.
+10,,sweet potatoes,vegetable,,100,bright,low,sandy loam,"Spacing: 30-45cm, Depth: slips planted 10-15cm deep",Plant slips after last frost, well-drained soil, mound the soil.
+11,,potatoes,vegetable,,90,bright,moderate,loose,"Spacing: 20-30cm, Depth: 10-15cm",Plant seed potatoes in cool soil, mound soil as they grow, avoid waterlogged areas.
+12,,spring onions,vegetable,,60,bright,moderate,rich,"Spacing: 5-10cm, Depth: 1-2cm",Plant sets or seeds, harvest frequently, well-drained soil.
