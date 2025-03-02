@@ -1,5 +1,3 @@
--- In this SQL file, write (and comment!) the schema of your database, including the CREATE TABLE, CREATE INDEX, CREATE VIEW, etc. statements that compose it
-
 -- Table for storing seed details
 CREATE TABLE "seeds" (
     "seed_id" INTEGER,
@@ -32,7 +30,7 @@ CREATE TABLE "plants" (
     FOREIGN KEY ("seed_id") REFERENCES "seeds"("seed_id")
 );
 
--- Table for garden sections
+-- Table for storing garden sections
 CREATE TABLE "sections" (
     "section_id" INTEGER,
     "section_name" TEXT NOT NULL,
@@ -43,7 +41,7 @@ CREATE TABLE "sections" (
     PRIMARY KEY("section_id")
 );
 
--- Table for tracking planted instances--trigger
+-- Table for tracking planted instances
 CREATE TABLE "plants_and_sections" (
     "id" INTEGER,
     "plant_id" INTEGER,
@@ -56,7 +54,7 @@ CREATE TABLE "plants_and_sections" (
     FOREIGN KEY("section_id") REFERENCES "sections"("section_id")
 );
 
--- Table for tracking germinated instances--trigger
+-- Table for tracking germinated instances
 CREATE TABLE "seeds_and_sections" (
     "id" INTEGER,
     "seed_id" INTEGER,
