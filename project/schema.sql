@@ -3,7 +3,6 @@ CREATE TABLE "seeds" (
     "seed_id" INTEGER,
     "seed_name_in_english" TEXT NOT NULL,
     "seed_name_in_sinhala" TEXT NOT NULL,
-    "seed_image" BLOB, -- Store images
     "days_to_germinate" INTEGER NOT NULL CHECK("days_to_germinate" > 0),
     "direct_sow" TEXT CHECK("direct_sow" IN ('yes', 'no')) NOT NULL DEFAULT 'no',
     "water_soak" TEXT CHECK("water_soak" IN ('yes', 'no')) NOT NULL DEFAULT 'no',
@@ -19,7 +18,6 @@ CREATE TABLE "plants" (
     "plant_name_in_english" TEXT NOT NULL,
     "plant_name_in_sinhala" TEXT NOT NULL,
     "plant_type" TEXT CHECK("plant_type" IN ('vegetable', 'fruit', 'herb', 'flower', 'ornamental')) NOT NULL,
-    "plant_image" BLOB, -- Store images
     "days_to_maturity" INTEGER NOT NULL CHECK("days_to_maturity" > 0),
     "ideal_sunlight" TEXT CHECK("ideal_sunlight" IN ('bright', 'medium', 'low')) NOT NULL,
     "ideal_water" TEXT CHECK("ideal_water" IN ('high', 'moderate', 'low')) NOT NULL DEFAULT 'moderate',

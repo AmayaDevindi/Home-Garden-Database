@@ -1,9 +1,0 @@
-seed_id,seed_name,seed_image,days_to_germinate,direct_sow,water_soak,how_to_plant,notes
-1,tomatoes,,7,no,no,"Start seeds indoors 6-8 weeks before last frost, sow 0.5cm deep.",
-2,cabbage,,5,no,no,"Start seeds indoors or direct sow in cool weather, sow 1cm deep.",
-3,chilli pepper,,7,no,no,"Start seeds indoors, provide warm temperatures, sow 0.5cm deep.",
-4,okra,,7,yes,no,"Direct sow after soil warms, sow 2cm deep.",
-5,corn,,7,yes,no,"Direct sow after last frost, sow 2-5cm deep.",
-6,long white raddish,,4,yes,no,"Direct sow in cool weather, sow 1cm deep.",
-7,green long beans,,7,yes,no,"Direct sow after last frost, sow 2-3cm deep.",
-8,cowpea,,7,yes,no,"Direct sow after last frost, sow 2-3cm deep."
